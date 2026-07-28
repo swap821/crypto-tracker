@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { fetchTopCoins } from '../services/api';
 import CoinCard from '../components/CoinCard';
-import SearchBar from '../components/SearchBar'; // 1. Import SearchBar
+import SearchBar from '../components/SearchBar';
 
 export default function Home() {
   const [coins, setCoins] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(''); // 2. Add search state
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const getCoins = async () => {
@@ -34,7 +35,6 @@ export default function Home() {
     getCoins();
   }, []);
 
-  // 3. Filter coins based on search input (checks both name and symbol)
   const filteredCoins = coins.filter((coin) =>
     coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     coin.symbol.toLowerCase().includes(searchTerm.toLowerCase())
@@ -56,29 +56,54 @@ export default function Home() {
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">Cryptocurrency Tracker</h1>
+        <motion.h1 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+        >
+          Cryptocurrency Tracker
+        </motion.h1>
         <p className="text-gray-400 mb-6">
           Showing top 100 coins by market cap
         </p>
 
-        {/* 4. Render SearchBar and pass down state */}
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         
-        {/* 5. Show a message if no coins match the search */}
         {filteredCoins.length === 0 ? (
           <div className="text-gray-400 text-center py-10">
             No coins found matching "{searchTerm}"
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {/* 6. Map over filteredCoins instead of coins */}
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          >
             {filteredCoins.map((coin) => (
-              <CoinCard key={coin.id} coin={coin} />
+              <motion.div key={coin.id} variants={itemVariants}>
+                <CoinCard coin={coin} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
